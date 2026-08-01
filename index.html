@@ -190,7 +190,7 @@
                     <h2 class="font-bold text-lg flex items-center">
                         <i class="fa-solid fa-list-check text-emerald-400 mr-2"></i> Directorio de Fuentes y Portales Oficiales en Chile
                     </h2>
-                    <p class="text-xs text-slate-300 mt-0.5">Catálogo oficial para consultar edictos, remates de juzgados civles y subastas inmobiliarias privadas</p>
+                    <p class="text-xs text-slate-300 mt-0.5">Catálogo oficial para consultar edictos, remates de juzgados civiles y subastas inmobiliarias privadas</p>
                 </div>
                 <span class="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-bold">7 Fuentes Mapeadas</span>
             </div>
@@ -275,7 +275,7 @@
 
     <!-- GEMINI API CONFIGURATION MODAL -->
     <div id="apiModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 animate-fadeIn">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
             <!-- Modal Header -->
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center space-x-2">
@@ -441,7 +441,7 @@
                     <td class="p-2.5 text-xs text-slate-600">${item.modalidad}</td>
                     <td class="p-2.5 text-center">
                         <a href="${item.url}" target="_blank" rel="noopener noreferrer" 
-                           class="inline-flex items-center space-x-1.5 bg-blue-60 hover:bg-blue-600 hover:text-white text-blue-700 border border-blue-300 px-3 py-1 rounded-md text-xs font-bold transition shadow-sm">
+                           class="inline-flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-xs font-bold transition shadow-sm">
                             <span>Abrir Ficha</span>
                             <i class="fa-solid fa-up-right-from-square text-[11px]"></i>
                         </a>
@@ -548,7 +548,6 @@
             }, 3500);
         }
 
-        // GEMINI API & LIVE SCRAPING EXTENSION
         function openApiModal() {
             const storedKey = localStorage.getItem('gemini_api_key') || '';
             const input = document.getElementById('geminiApiKeyInput');
@@ -606,7 +605,7 @@
 
             loader.classList.remove('hidden');
             progressBar.style.width = '20%';
-            statusText.innerText = 'Inicializando modelo Gemini 1.5 Flash...';
+            statusText.innerText = 'Inicializando modelo Gemini 2.0 Flash...';
 
             try {
                 setTimeout(() => {
@@ -620,7 +619,7 @@
                 }, 2000);
 
                 // Call Google Gemini API
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -665,7 +664,6 @@
             }
         }
 
-        // Initial render on window load
         window.onload = function() {
             renderTable(rematesData);
         };
