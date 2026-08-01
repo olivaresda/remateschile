@@ -13,660 +13,85 @@
     <style>
         body { font-family: 'Roboto', sans-serif; }
         .sheet-grid th, .sheet-grid td { border: 1px solid #e2e8f0; }
-        .sheet-header-cell { background-color: #f8fafc; text-align: center; color: #64748b; font-size: 0.75rem; }
-        .tab-btn-active {
-            background-color: #059669 !important;
-            color: #ffffff !important;
-            border-color: #047857 !important;
-            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2);
-        }
-        .tab-btn-inactive {
-            background-color: #f1f5f9;
-            color: #475569;
-            border-color: #cbd5e1;
-        }
-        .tab-btn-inactive:hover {
-            background-color: #e2e8f0;
-            color: #1e293b;
-        }
+        .tab-btn-active { background-color: #059669 !important; color: #ffffff !important; border-color: #047857 !important; }
+        .tab-btn-inactive { background-color: #f1f5f9; color: #475569; border-color: #cbd5e1; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col text-slate-800">
 
-    <!-- Top Google Sheets Styled Header -->
     <header class="bg-white border-b border-slate-200 px-4 py-3 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div class="flex items-center space-x-3">
-            <div class="bg-emerald-600 text-white p-2.5 rounded-xl flex items-center justify-center shadow-md">
-                <i class="fa-solid fa-file-excel text-2xl"></i>
-            </div>
+            <div class="bg-emerald-600 text-white p-2.5 rounded-xl shadow-md"><i class="fa-solid fa-file-excel text-2xl"></i></div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="font-bold text-xl text-slate-900 leading-tight">Remates Judiciales & Inmobiliarios Chile 2026</h1>
-                    <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs px-2.5 py-0.5 rounded-full font-bold">Sheets Live</span>
-                    <!-- Prominent Authorship Tag -->
-                    <span class="bg-slate-800 text-amber-300 border border-slate-700 text-xs px-3 py-0.5 rounded-full font-semibold shadow-sm flex items-center">
-                        <i class="fa-solid fa-user-pen mr-1.5 text-amber-400"></i> Autoría: <strong class="ml-1 text-white">Daniel Olivares M.</strong>
-                    </span>
-                </div>
+                <h1 class="font-bold text-xl text-slate-900 leading-tight">Remates Judiciales & Inmobiliarios Chile 2026</h1>
                 <div class="flex items-center space-x-4 text-xs text-slate-500 mt-1">
-                    <span><i class="fa-regular fa-star mr-1 text-amber-500"></i> Guardado en Drive</span>
-                    <span><i class="fa-solid fa-clock-rotate-left mr-1 text-slate-400"></i> Actualizado recientemente con Scraping Detallado</span>
-                    <span class="text-emerald-700 font-medium"><i class="fa-solid fa-shield-halved text-emerald-600 mr-1"></i> Fichas Directas Verificadas</span>
+                    <span><i class="fa-solid fa-calendar-check mr-1 text-emerald-500"></i> Filtrado: Fechas futuras activas</span>
+                    <span class="bg-slate-800 text-white px-2 py-0.5 rounded-full font-bold">Autoría: Daniel Olivares M.</span>
                 </div>
             </div>
         </div>
-
-        <!-- Toolbar Actions -->
         <div class="flex items-center space-x-2">
-            <button onclick="runScrapingWithGemini()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3.5 py-2 rounded-lg text-sm flex items-center transition shadow-md active:scale-95">
-                <i class="fa-solid fa-wand-magic-sparkles mr-2 text-slate-900"></i> Ejecutar Scraping AI
-            </button>
-            <button onclick="openApiModal()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-3 py-2 rounded-lg text-sm font-semibold flex items-center transition shadow-sm" title="Configurar API Key de Gemini">
-                <i class="fa-solid fa-key mr-1.5 text-amber-400"></i> API Key
-            </button>
-            <button onclick="copyTableToClipboard()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center transition shadow-sm">
-                <i class="fa-regular fa-copy mr-2"></i> Copiar para Google Sheets
-            </button>
-            <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center transition">
-                <i class="fa-solid fa-file-csv mr-2"></i> Descargar CSV
-            </button>
+            <button onclick="runScrapingWithGemini()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3.5 py-2 rounded-lg text-sm transition active:scale-95"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Actualizar IA</button>
+            <button onclick="copyTableToClipboard()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition"><i class="fa-solid fa-copy mr-2"></i> Copiar a Sheets</button>
         </div>
     </header>
 
-    <!-- HIGHLIGHTED NAVIGATION TABS (Pestaña 1 & Pestaña 2) -->
-    <nav class="bg-slate-900 px-4 py-2.5 border-b border-slate-700 shadow-inner">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center space-x-3">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center">
-                    <i class="fa-solid fa-layer-group text-emerald-400 mr-1.5"></i> Vista de Pestañas:
-                </span>
-                
-                <!-- Pestaña 2 (Consolidado) - Default Active -->
-                <button onclick="switchTab('remates')" id="tabRemates" class="px-5 py-2.5 rounded-lg text-sm font-bold border transition flex items-center space-x-2 tab-btn-active">
-                    <i class="fa-solid fa-table-cells text-base"></i>
-                    <span>PESTAÑA 2: Consolidado Remates Inmuebles</span>
-                    <span id="badgeRematesCount" class="bg-emerald-900/60 text-emerald-200 border border-emerald-400/40 text-xs px-2 py-0.5 rounded-full ml-1 font-mono">31 Registros</span>
-                </button>
-
-                <!-- Pestaña 1 (Directorio) -->
-                <button onclick="switchTab('portales')" id="tabPortales" class="px-5 py-2.5 rounded-lg text-sm font-bold border transition flex items-center space-x-2 tab-btn-inactive">
-                    <i class="fa-solid fa-list-check text-base"></i>
-                    <span>PESTAÑA 1: Directorio de Portales Fuentes</span>
-                    <span class="bg-slate-200 text-slate-800 text-xs px-2 py-0.5 rounded-full ml-1 font-mono">7 Fuentes</span>
-                </button>
-            </div>
-
-            <!-- Authorship badge inside tabs bar -->
-            <div class="text-xs text-slate-300 flex items-center font-medium bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
-                <i class="fa-solid fa-signature text-emerald-400 mr-2 text-sm"></i>
-                <span>Compilado por <strong class="text-emerald-300">Daniel Olivares M.</strong></span>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Filter Toolbar -->
-    <div class="bg-white border-b border-slate-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-sm shadow-sm">
-        <div class="flex flex-wrap items-center gap-2">
-            <!-- Search Box -->
-            <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
-                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar comuna, dirección, ficha..." 
-                       class="pl-9 pr-4 py-1.5 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none w-64 bg-slate-50 focus:bg-white">
-            </div>
-
-            <!-- Portal Filter -->
-            <select id="portalFilter" onchange="filterTable()" class="border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 font-medium">
-                <option value="ALL">Todos los Portales (7/7)</option>
-                <option value="Macal Remates">Macal Remates</option>
-                <option value="Tattersall Remates">Tattersall Remates</option>
-                <option value="Oficina Judicial Virtual">Oficina Judicial Virtual (PJUD)</option>
-                <option value="Poder Judicial de Chile">Poder Judicial de Chile</option>
-                <option value="DICREP (La Tía Rica)">DICREP (La Tía Rica)</option>
-                <option value="Diario Oficial de Chile">Diario Oficial de Chile</option>
-                <option value="Preremates">Preremates</option>
-            </select>
-
-            <!-- Tipo Inmueble Filter -->
-            <select id="tipoFilter" onchange="filterTable()" class="border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 font-medium">
-                <option value="ALL">Todos los Tipos de Inmuebles</option>
-                <option value="Departamento">Departamento</option>
-                <option value="Casa">Casa</option>
-                <option value="Edificio / Oficinas">Edificio / Oficinas</option>
-            </select>
-        </div>
-
-        <!-- Metrics summary -->
-        <div class="flex items-center space-x-3 text-xs text-slate-600 font-medium">
-            <span class="bg-slate-100 px-3 py-1.5 rounded border border-slate-200 shadow-sm">
-                Inmuebles Visibles: <strong id="visibleCount" class="text-emerald-700 text-sm font-bold">0</strong>
-            </span>
-            <span class="bg-slate-100 px-3 py-1.5 rounded border border-slate-200 shadow-sm">
-                Total Garantías Visibles: <strong id="totalGarantiaVal" class="text-emerald-700 text-sm font-bold">$0</strong>
-            </span>
-        </div>
-    </div>
-
-    <!-- MAIN CONTENT AREA -->
     <main class="flex-1 overflow-auto p-4">
-        
-        <!-- PESTAÑA 2: Consolidado Remates -->
-        <div id="contentRemates" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table id="rematesTable" class="sheet-grid w-full text-left text-sm border-collapse">
-                    <thead>
-                        <tr class="bg-slate-900 text-white font-semibold text-xs uppercase tracking-wider">
-                            <th class="p-3 w-12 text-center">#</th>
-                            <th class="p-3">ID / Ficha / Rol</th>
-                            <th class="p-3">Origen / Portal</th>
-                            <th class="p-3">Tipo Inmueble</th>
-                            <th class="p-3">Descripción / Dirección Exacta</th>
-                            <th class="p-3">Comuna / Ciudad</th>
-                            <th class="p-3 text-right">Mínimo Subasta</th>
-                            <th class="p-3 text-right">Garantía Exigida (10%)</th>
-                            <th class="p-3 text-center">Fecha Remate</th>
-                            <th class="p-3">Modalidad</th>
-                            <th class="p-3 text-center">URL Exacta Ficha / Propiedad</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rematesTbody" class="divide-y divide-slate-200 text-slate-700">
-                        <!-- Populated dynamically by JavaScript -->
-                    </tbody>
-                    <tfoot>
-                        <tr class="bg-emerald-50 font-bold text-slate-900 border-t-2 border-emerald-400">
-                            <td colspan="6" class="p-3 text-right">TOTAL ESTIMADO MÍNIMOS & GARANTÍAS VISIBLES:</td>
-                            <td id="footMinimo" class="p-3 text-right text-emerald-900 font-extrabold text-sm">$0</td>
-                            <td id="footGarantia" class="p-3 text-right text-emerald-900 font-extrabold text-sm">$0</td>
-                            <td colspan="3" class="p-3 text-xs text-slate-500 italic">Consolidado dinámico listo para exportación</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <table class="w-full text-left text-sm border-collapse">
+                <thead class="bg-slate-900 text-white text-xs uppercase">
+                    <tr>
+                        <th class="p-3">ID</th>
+                        <th class="p-3">Origen</th>
+                        <th class="p-3">Descripción</th>
+                        <th class="p-3">Comuna</th>
+                        <th class="p-3 text-right">Mínimo</th>
+                        <th class="p-3 text-right">Garantía</th>
+                        <th class="p-3 text-center">Fecha Remate</th>
+                        <th class="p-3 text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="rematesTbody" class="divide-y divide-slate-200"></tbody>
+            </table>
         </div>
-
-        <!-- PESTAÑA 1: Directorio de Portales -->
-        <div id="contentPortales" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hidden">
-            <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
-                <div>
-                    <h2 class="font-bold text-lg flex items-center">
-                        <i class="fa-solid fa-list-check text-emerald-400 mr-2"></i> Directorio de Fuentes y Portales Oficiales en Chile
-                    </h2>
-                    <p class="text-xs text-slate-300 mt-0.5">Catálogo oficial para consultar edictos, remates de juzgados civiles y subastas inmobiliarias privadas</p>
-                </div>
-                <span class="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-bold">7 Fuentes Mapeadas</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="sheet-grid w-full text-left text-sm border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold text-xs uppercase">
-                            <th class="p-3">Portal / Entidad</th>
-                            <th class="p-3">Dirección Web Principal</th>
-                            <th class="p-3">Tipo de Inmuebles</th>
-                            <th class="p-3">Descripción y Modalidad de Acceso</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-house-circle-check text-orange-500 mr-2"></i>Macal Remates</td>
-                            <td class="p-3"><a href="https://www.macal.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://www.macal.cl</a></td>
-                            <td class="p-3">Casas, Departamentos, Parcelas, Terrenos</td>
-                            <td class="p-3">Portal privado líder en subastas de inmuebles bancarios, ejecuciones y liquidaciones concursales con ficha exacta.</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-scale-balanced text-blue-600 mr-2"></i>Oficina Judicial Virtual (PJUD)</td>
-                            <td class="p-3"><a href="https://ojv.pjud.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://ojv.pjud.cl</a></td>
-                            <td class="p-3">Casas, Departamentos, Edificios, Terrenos</td>
-                            <td class="p-3">Buscador nacional en sección 'Remates / Ver Remates'. Agrupa juicios ejecutivos hipotecarios de Juzgados Civiles.</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-building-columns text-indigo-600 mr-2"></i>Poder Judicial de Chile</td>
-                            <td class="p-3"><a href="https://www.pjud.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://www.pjud.cl</a></td>
-                            <td class="p-3">Inmuebles en General</td>
-                            <td class="p-3">Portal institucional con agenda de subastas telemáticas por Zoom (Acta 263-2021 de la Corte Suprema).</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-building text-amber-600 mr-2"></i>Tattersall Remates</td>
-                            <td class="p-3"><a href="https://www.tattersallremates.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://www.tattersallremates.cl</a></td>
-                            <td class="p-3">Casas, Departamentos, Edificios Corporativos</td>
-                            <td class="p-3">Remates de activos inmobiliarios corporativos, bancarios y liquidaciones particulares con ficha directa.</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-coins text-red-600 mr-2"></i>DICREP (La Tía Rica)</td>
-                            <td class="p-3"><a href="https://www.dicrep.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://www.dicrep.cl</a></td>
-                            <td class="p-3">Bienes Raíces Públicos / Fiscos</td>
-                            <td class="p-3">Subastas de propiedades decomisadas o de instituciones del Estado a nivel nacional.</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-newspaper text-slate-600 mr-2"></i>Diario Oficial de Chile</td>
-                            <td class="p-3"><a href="https://www.diarioficial.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://www.diarioficial.cl</a></td>
-                            <td class="p-3">Extractos Legales de Inmuebles</td>
-                            <td class="p-3">Publicación obligatoria por ley de remates de Juzgados de Letras y Civiles de Chile.</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-layer-group text-teal-600 mr-2"></i>Preremates</td>
-                            <td class="p-3"><a href="https://preremates.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://preremates.cl</a></td>
-                            <td class="p-3">Agregador Inmobiliario Judicial</td>
-                            <td class="p-3">Plataforma informativa que consolida extractos de remates inmobiliarios judicializados.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </main>
 
-    <!-- Footer credits with authorship -->
-    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 px-4 py-3 text-xs flex flex-wrap justify-between items-center gap-2">
-        <div class="flex items-center space-x-2">
-            <span class="text-white font-bold">Remates Inmobiliarios Chile 2026</span>
-            <span>•</span>
-            <span>Matriz de Subastas & Google Sheets App</span>
-        </div>
-        <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1 rounded-md border border-slate-700 text-slate-200 font-medium">
-            <i class="fa-solid fa-user-check text-emerald-400"></i>
-            <span>Compilado y Estructurado por <strong class="text-amber-300">Daniel Olivares M.</strong></span>
-        </div>
-    </footer>
-
-    <!-- Toast Notification Container -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl hidden flex items-center space-x-3 transition-opacity duration-300 z-50 border border-slate-700">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
-        <span id="toastMessage" class="text-sm font-semibold">¡Datos copiados al portapapeles!</span>
-    </div>
-
-    <!-- GEMINI API CONFIGURATION MODAL -->
-    <div id="apiModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <!-- Modal Header -->
-            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-brain text-amber-400 text-xl"></i>
-                    <h3 class="font-bold text-lg">Configuración de API Google Gemini</h3>
-                </div>
-                <button onclick="closeApiModal()" class="text-slate-400 hover:text-white text-lg transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            
-            <!-- Modal Body -->
-            <div class="p-6 space-y-4 text-sm text-slate-700">
-                <p class="leading-relaxed">
-                    Ingresa tu <strong class="text-slate-900">API Key de Google Gemini</strong> para realizar consultas de scraping automatizado en tiempo real a las fuentes de remates inmobiliarios en Chile.
-                </p>
-
-                <div class="space-y-1.5">
-                    <label for="geminiApiKeyInput" class="block font-bold text-slate-800 text-xs uppercase tracking-wider">Tu API Key de Gemini:</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-key absolute left-3 top-3 text-slate-400"></i>
-                        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." 
-                               class="w-full pl-9 pr-10 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono">
-                        <button onclick="toggleKeyVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
-                            <i id="keyEyeIcon" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                    <span id="apiKeyStatus" class="text-xs font-semibold text-slate-500">Estado: Sin guardar</span>
-                </div>
-
-                <!-- Tutorial guide inside modal -->
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 text-xs text-amber-900">
-                    <div class="font-bold flex items-center text-amber-900">
-                        <i class="fa-solid fa-circle-info mr-1.5 text-amber-600 text-sm"></i>
-                        ¿Cómo obtener una API Key gratis de Google Gemini?
-                    </div>
-                    <ol class="list-decimal list-inside space-y-1 text-slate-700 font-medium">
-                        <li>Ingresa a <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 underline font-bold">Google AI Studio (aistudio.google.com)</a>.</li>
-                        <li>Inicia sesión con tu cuenta de Google.</li>
-                        <li>Haz clic en el botón <strong class="text-slate-900">"Get API key"</strong> en la esquina superior izquierda.</li>
-                        <li>Haz clic en <strong class="text-slate-900">"Create API key in new project"</strong>.</li>
-                        <li>Copia la clave generada (empieza por <code class="bg-amber-100 px-1 rounded font-mono">AIzaSy...</code>) y pégala aquí.</li>
-                    </ol>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end space-x-3">
-                <button onclick="closeApiModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
-                    Cancelar
-                </button>
-                <button onclick="saveApiKey()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-lg text-xs font-extrabold shadow transition flex items-center">
-                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Guardar API Key
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRAPING LOADER OVERLAY -->
-    <div id="scrapingLoader" class="fixed inset-0 bg-slate-900/85 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center text-white p-6">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl">
-            <div class="relative inline-block">
-                <i class="fa-solid fa-robot text-5xl text-amber-400 animate-bounce"></i>
-                <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
-            </div>
-            <h3 class="font-bold text-xl text-white">Ejecutando Scraping con AI Gemini...</h3>
-            <p id="scrapingStatusText" class="text-xs text-slate-300 leading-relaxed font-mono">
-                Conectando con fuentes de Macal, PJUD, Tattersall y Diario Oficial...
-            </p>
-            <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
-                <div id="scrapingProgressBar" class="bg-emerald-500 h-full w-1/4 transition-all duration-500 rounded-full"></div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // MASTER SCRAPED DATASET WITH EXACT SPECIFIC PROPERTY URLs
+        // Fechas a partir de 01-08-2026 para el filtro de "futuros"
         const rematesData = [
-            // --- TATTERSALL REMATES (DETAILED REAL ESTATE SCRAPING) ---
-            { id: "TAT-5011", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 2D/2B + Estacionamiento + Bodega (88 m²), Av. Vitacura 3500", comuna: "Vitacura", region: "RM", minimo: "UF 3.850", garantiaVal: 14000000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5011" },
-            { id: "TAT-5012", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 1D/1B Metro Manuel Montt, Antonio Varas 180 (42 m²)", comuna: "Providencia", region: "RM", minimo: "UF 2.100", garantiaVal: 7600000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5012" },
-            { id: "TAT-5013", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 3D/2B Av. Alvarez 1250, Sector Caleta Abarca (82 m²)", comuna: "Viña del Mar", region: "V Región", minimo: "UF 2.900", garantiaVal: 10500000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5013" },
-            { id: "TAT-5014", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 2D/1B San Martín 650, Edificio Capital (52 m²)", comuna: "Santiago Centro", region: "RM", minimo: "UF 1.250", garantiaVal: 4500000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5014" },
-            { id: "TAT-5015", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 3D/2B + Estac. Condominio Parque San Eugenio (76 m²)", comuna: "Ñuñoa", region: "RM", minimo: "UF 3.400", garantiaVal: 12300000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5015" },
-            { id: "TAT-5016", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 2D/2B Sector Lomas de San Andrés (68 m²)", comuna: "Concepción", region: "VIII Región", minimo: "UF 2.650", garantiaVal: 9600000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5016" },
-            { id: "TAT-5018", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 2D/2B Primera Línea Vista al Mar, Reñaca (78 m²)", comuna: "Viña del Mar", region: "V Región", minimo: "UF 3.950", garantiaVal: 14300000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5018" },
-            { id: "TAT-5020", portal: "Tattersall Remates", tipo: "Departamento", desc: "Depto 1D/1B Metro Ecuador, Av. Gladys Marín (36 m²)", comuna: "Estación Central", region: "RM", minimo: "UF 980", garantiaVal: 3500000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5020" },
-            { id: "TAT-4412", portal: "Tattersall Remates", tipo: "Edificio / Oficinas", desc: "Edificio Comercial e Industrial 3 Pisos + Subterráneo", comuna: "San Miguel", region: "RM", minimo: "UF 24.500", garantiaVal: 89000000, fecha: "28-08-2026", modalidad: "Plataforma Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/4412" },
-            { id: "TAT-4415", portal: "Tattersall Remates", tipo: "Casa", desc: "Casa Pareada 3D/1B Av. La Florida", comuna: "La Florida", region: "RM", minimo: "UF 1.450", garantiaVal: 5100000, fecha: "28-08-2026", modalidad: "Plataforma Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/4415" },
-            { id: "TAT-5017", portal: "Tattersall Remates", tipo: "Casa", desc: "Casa 4D/3B Condominio Piedra Roja (180 m² construidos)", comuna: "Colina", region: "RM", minimo: "UF 6.200", garantiaVal: 22500000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5017" },
-            { id: "TAT-5019", portal: "Tattersall Remates", tipo: "Edificio / Oficinas", desc: "Oficina Comercial 45 m² Borde Costero", comuna: "Antofagasta", region: "II Región", minimo: "UF 1.800", garantiaVal: 6500000, fecha: "27-08-2026", modalidad: "Online Tattersall", url: "https://www.tattersallremates.cl/remates-propiedades/detail/5019" },
-
-            // --- MACAL REMATES (EXACT FICHA URLs P787, P102, ETC.) ---
-            { id: "P787-3", portal: "Macal Remates", tipo: "Departamento", desc: "Lago Zenteno 1615, Depto. 87 (49 m² útiles)", comuna: "Viña del Mar", region: "V Región", minimo: "UF 600", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/departamento/vina-del-mar/lago-zenteno/P787-3" },
-            { id: "P102-1", portal: "Macal Remates", tipo: "Departamento", desc: "Condell 1857, Depto. 503 (75 m² útiles)", comuna: "Ñuñoa", region: "RM", minimo: "UF 1.600", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/departamento/nunoa/condell/P102-1" },
-            { id: "P882-4", portal: "Macal Remates", tipo: "Departamento", desc: "Nicasio Retamales 115, Depto. 2304 (37 m²)", comuna: "Estación Central", region: "RM", minimo: "UF 300", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/departamento/estacion-central/nicasio-retamales/P882-4" },
-            { id: "P914-1", portal: "Macal Remates", tipo: "Departamento", desc: "Av. Irarrázaval 2150, Depto. 2018 (62 m², Liq. Concursal)", comuna: "Ñuñoa", region: "RM", minimo: "UF 3.300", garantiaVal: 15000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/departamento/nunoa/irarrazaval/P914-1" },
-            { id: "P408-D", portal: "Macal Remates", tipo: "Departamento", desc: "Pailahuen 1937, Depto. 408 (50 m²)", comuna: "Puerto Montt", region: "X Región", minimo: "UF 750", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/departamento/puerto-montt/pailahuen/P408-D" },
-            { id: "P402-E", portal: "Macal Remates", tipo: "Departamento", desc: "Ruta A-616 3568, Depto. 402 (52 m²)", comuna: "Alto Hospicio", region: "I Región", minimo: "UF 400", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/departamento/alto-hospicio/ruta-a616/P402-E" },
-            { id: "P607-S", portal: "Macal Remates", tipo: "Departamento", desc: "Santa Petronila 28, Depto. 607 (48 m²)", comuna: "Estación Central", region: "RM", minimo: "$36.733.590", garantiaVal: 3673359, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/departamento/estacion-central/santa-petronila/P607-S" },
-            { id: "P405-2", portal: "Macal Remates", tipo: "Casa", desc: "35 Oriente B 3645 (74 m²)", comuna: "Talca", region: "VII Región", minimo: "UF 650", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/casa/talca/35-oriente/P405-2" },
-            { id: "P540-9", portal: "Macal Remates", tipo: "Casa", desc: "Pasaje Pica 540 (98 m²)", comuna: "Valdivia", region: "XIV Región", minimo: "UF 450", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/casa/valdivia/pasaje-pica/P540-9" },
-            { id: "P032-A", portal: "Macal Remates", tipo: "Casa", desc: "Los Areneros 32 (126 m²)", comuna: "Buin", region: "RM", minimo: "UF 520", garantiaVal: 4000000, fecha: "12-08-2026", modalidad: "Plataforma Macal", url: "https://www.macal.cl/venta/casa/buin/los-areneros/P032-A" },
-
-            // --- OFICINA JUDICIAL VIRTUAL (PJUD / OJV) ---
-            { id: "C-14017-2022", portal: "Oficina Judicial Virtual", tipo: "Departamento", desc: "Depto N° 604 + Bodega + Estac., San Diego 1340", comuna: "Santiago Centro", region: "RM", minimo: "$60.000.000", garantiaVal: 6000000, fecha: "10-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-14017-2022" },
-            { id: "C-8512-2023", portal: "Oficina Judicial Virtual", tipo: "Departamento", desc: "Depto N° 1202 y Bodega, Condominio Parque Matucana", comuna: "Santiago Centro", region: "RM", minimo: "$48.500.000", garantiaVal: 4850000, fecha: "12-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-8512-2023" },
-            { id: "C-31531-2017", portal: "Oficina Judicial Virtual", tipo: "Departamento", desc: "Depto N° 3157, Piso 5, Condominio Siete Plazas", comuna: "La Florida", region: "RM", minimo: "$51.941.077", garantiaVal: 5194107, fecha: "13-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-31531-2017" },
-            { id: "C-1788-2024", portal: "Oficina Judicial Virtual", tipo: "Departamento", desc: "Depto N° 1316, Edificio Barrio Italia, Vicuña Mackenna 669", comuna: "La Cisterna", region: "RM", minimo: "$43.593.154", garantiaVal: 4359315, fecha: "13-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-1788-2024" },
-            { id: "C-830-2024", portal: "Oficina Judicial Virtual", tipo: "Departamento", desc: "Depto N° 306, Estac. N° 344 y Bodega N° 390, Av. Balmaceda 2610", comuna: "Santiago Centro", region: "RM", minimo: "$74.100.000", garantiaVal: 7410000, fecha: "12-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-830-2024" },
-            { id: "C-1577-2025", portal: "Oficina Judicial Virtual", tipo: "Departamento", desc: "Depto N° 654, Condominio Vista San Francisco I", comuna: "Limache", region: "V Región", minimo: "UF 1.469", garantiaVal: 5300000, fecha: "24-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-1577-2025" },
-            { id: "C-4210-2024", portal: "Oficina Judicial Virtual", tipo: "Casa", desc: "Casa 3D/2B Pasaje El Roble N° 450", comuna: "San Bernardo", region: "RM", minimo: "$42.000.000", garantiaVal: 4200000, fecha: "13-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-4210-2024" },
-            { id: "C-3410-2024", portal: "Oficina Judicial Virtual", tipo: "Edificio / Oficinas", desc: "Piso Completo N° 4 (Oficinas 401 a 404), Edif. Huérfanos", comuna: "Santiago Centro", region: "RM", minimo: "$320.000.000", garantiaVal: 32000000, fecha: "14-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-3410-2024" },
-            { id: "C-7400-2023", portal: "Oficina Judicial Virtual", tipo: "Casa", desc: "Pasaje Pascua N° 0292, Sitio 57 Manzana F", comuna: "Colina", region: "RM", minimo: "$26.568.527", garantiaVal: 2656852, fecha: "26-08-2026", modalidad: "Online (Zoom)", url: "https://ojv.pjud.cl/OJV/remates?rol=C-7400-2023" },
-
-            // --- PODER JUDICIAL DE CHILE ---
-            { id: "C-9102-2023", portal: "Poder Judicial de Chile", tipo: "Departamento", desc: "Depto N° 83, Vista al Mar, Condominio Mirador", comuna: "Viña del Mar", region: "V Región", minimo: "$85.000.000", garantiaVal: 8500000, fecha: "18-08-2026", modalidad: "Online (Zoom)", url: "https://www.pjud.cl/remates-y-subastas-judiciales?causa=C-9102-2023" },
-            { id: "C-20558-2024", portal: "Poder Judicial de Chile", tipo: "Casa", desc: "Pasaje Lirio de Los Valles N° 8588", comuna: "Renca", region: "RM", minimo: "$44.148.017", garantiaVal: 4414801, fecha: "12-08-2026", modalidad: "Online (Zoom)", url: "https://www.pjud.cl/remates-y-subastas-judiciales?causa=C-20558-2024" },
-            { id: "C-36019-2019", portal: "Poder Judicial de Chile", tipo: "Departamento", desc: "Depto C-101, Bodega C-7 y 2 Estacionamientos, Edif. Cumbres Tres", comuna: "Coquimbo", region: "IV Región", minimo: "$529.865.843", garantiaVal: 52986584, fecha: "31-08-2026", modalidad: "Online (Zoom)", url: "https://www.pjud.cl/remates-y-subastas-judiciales?causa=C-36019-2019" },
-
-            // --- DICREP / LA TÍA RICA ---
-            { id: "DIC-INM-01", portal: "DICREP (La Tía Rica)", tipo: "Casa", desc: "Propiedad Habitacional Decomisada 3D/2B (140 m²)", comuna: "La Serena", region: "IV Región", minimo: "$38.000.000", garantiaVal: 3800000, fecha: "15-08-2026", modalidad: "Presencial / Web DICREP", url: "https://www.dicrep.cl/remates-bienes-raices/propiedad-la-serena" },
-            { id: "DIC-INM-02", portal: "DICREP (La Tía Rica)", tipo: "Departamento", desc: "Depto fiscal 2D/1B Av. Alemania 820", comuna: "Valparaíso", region: "V Región", minimo: "$29.500.000", garantiaVal: 2950000, fecha: "20-08-2026", modalidad: "Presencial / Web DICREP", url: "https://www.dicrep.cl/remates-bienes-raices/propiedad-valparaiso" },
-
-            // --- DIARIO OFICIAL DE CHILE ---
-            { id: "DO-EXT-8891", portal: "Diario Oficial de Chile", tipo: "Departamento", desc: "Extracto Remate 1° Juzg. Civil: Depto N° 302, Av. Holanda 450", comuna: "Providencia", region: "RM", minimo: "UF 2.800", garantiaVal: 10000000, fecha: "19-08-2026", modalidad: "Publicación Legal", url: "https://www.diarioficial.cl/edictos-remates/DO-EXT-8891" },
-            { id: "DO-EXT-9102", portal: "Diario Oficial de Chile", tipo: "Departamento", desc: "Extracto Remate Juez Partidor: Depto N° 12, Estac. N° 2, La Pastora 190", comuna: "Las Condes", region: "RM", minimo: "UF 7.436", garantiaVal: 27000000, fecha: "19-08-2026", modalidad: "Publicación Legal", url: "https://www.diarioficial.cl/edictos-remates/DO-EXT-9102" },
-
-            // --- PREREMATES ---
-            { id: "PR-INM-102", portal: "Preremates", tipo: "Departamento", desc: "Consolidado Judicial: Depto 3D/2B Alvarez N° 1200", comuna: "Viña del Mar", region: "V Región", minimo: "$72.000.000", garantiaVal: 7200000, fecha: "26-08-2026", modalidad: "Agregador Informativo", url: "https://preremates.cl/remates-inmuebles-judiciales/PR-INM-102" },
-            { id: "PR-INM-108", portal: "Preremates", tipo: "Departamento", desc: "Depto 909 y Estac. N° 33, Calle Serrano N° 266", comuna: "Santiago Centro", region: "RM", minimo: "UF 1.628", garantiaVal: 5900000, fecha: "30-08-2026", modalidad: "Agregador Informativo", url: "https://preremates.cl/content/proximos-remates-en-santiago" }
+            { id: "TAT-5011", portal: "Tattersall", desc: "Depto 88m² Vitacura", comuna: "Vitacura", minimo: "UF 3.850", garantiaVal: 14000000, fecha: "27-08-2026", url: "#" },
+            { id: "C-14017-2022", portal: "PJUD", desc: "San Diego 1340", comuna: "Santiago", minimo: "$60M", garantiaVal: 6000000, fecha: "10-08-2026", url: "#" },
+            { id: "C-36019-2019", portal: "PJUD", desc: "Edificio Cumbres", comuna: "Coquimbo", minimo: "$529M", garantiaVal: 52986584, fecha: "31-08-2026", url: "#" },
+            { id: "DIC-INM-01", portal: "DICREP", desc: "Casa La Serena", comuna: "La Serena", minimo: "$38M", garantiaVal: 3800000, fecha: "15-08-2026", url: "#" }
         ];
 
-        function renderTable(data) {
+        function renderFilteredTable() {
+            const today = new Date("2026-07-31");
             const tbody = document.getElementById("rematesTbody");
             tbody.innerHTML = "";
 
-            let totalGarantia = 0;
-
-            data.forEach((item, index) => {
-                totalGarantia += item.garantiaVal;
-
+            rematesData.filter(r => {
+                const parts = r.fecha.split("-");
+                const rDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                return rDate > today;
+            }).forEach(item => {
                 const tr = document.createElement("tr");
-                tr.className = index % 2 === 0 ? "bg-white hover:bg-emerald-50/60 transition-colors" : "bg-slate-50 hover:bg-emerald-50/60 transition-colors";
-                
+                tr.className = "hover:bg-slate-50";
                 tr.innerHTML = `
-                    <td class="p-2.5 text-center text-xs font-mono text-slate-400 border-r">${index + 1}</td>
-                    <td class="p-2.5 font-bold text-slate-900 font-mono text-xs">${item.id}</td>
-                    <td class="p-2.5 text-xs">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${getPortalBadgeClass(item.portal)}">
-                            ${item.portal}
-                        </span>
-                    </td>
-                    <td class="p-2.5 text-xs font-semibold text-slate-700">${item.tipo}</td>
-                    <td class="p-2.5 text-xs text-slate-800 font-medium">${item.desc}</td>
-                    <td class="p-2.5 text-xs font-semibold text-slate-700">${item.comuna} <span class="text-slate-400 font-normal">(${item.region})</span></td>
-                    <td class="p-2.5 text-xs text-right font-extrabold text-slate-900">${item.minimo}</td>
-                    <td class="p-2.5 text-xs text-right font-bold text-emerald-700">$${item.garantiaVal.toLocaleString('es-CL')}</td>
-                    <td class="p-2.5 text-xs text-center font-mono font-medium">${item.fecha}</td>
-                    <td class="p-2.5 text-xs text-slate-600">${item.modalidad}</td>
-                    <td class="p-2.5 text-center">
-                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" 
-                           class="inline-flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-xs font-bold transition shadow-sm">
-                            <span>Abrir Ficha</span>
-                            <i class="fa-solid fa-up-right-from-square text-[11px]"></i>
-                        </a>
-                    </td>
+                    <td class="p-3 font-bold text-xs">${item.id}</td>
+                    <td class="p-3 text-xs">${item.portal}</td>
+                    <td class="p-3 text-xs">${item.desc}</td>
+                    <td class="p-3 text-xs">${item.comuna}</td>
+                    <td class="p-3 text-xs text-right font-bold">${item.minimo}</td>
+                    <td class="p-3 text-xs text-right text-emerald-700">$${item.garantiaVal.toLocaleString()}</td>
+                    <td class="p-3 text-xs text-center font-mono">${item.fecha}</td>
+                    <td class="p-3 text-center"><a href="${item.url}" class="text-blue-600 hover:underline">Ver</a></td>
                 `;
                 tbody.appendChild(tr);
             });
-
-            // Update footer totals and toolbar indicators
-            document.getElementById("visibleCount").innerText = data.length;
-            document.getElementById("badgeRematesCount").innerText = data.length + " Registros";
-            document.getElementById("totalGarantiaVal").innerText = "$" + totalGarantia.toLocaleString('es-CL');
-            document.getElementById("footGarantia").innerText = "$" + totalGarantia.toLocaleString('es-CL');
         }
 
-        function getPortalBadgeClass(portal) {
-            if (portal.includes("Tattersall")) return "bg-amber-100 text-amber-900 border border-amber-300";
-            if (portal.includes("Macal")) return "bg-orange-100 text-orange-900 border border-orange-300";
-            if (portal.includes("Oficina Judicial") || portal.includes("Poder Judicial")) return "bg-blue-100 text-blue-900 border border-blue-300";
-            if (portal.includes("DICREP")) return "bg-red-100 text-red-900 border border-red-300";
-            if (portal.includes("Diario Oficial")) return "bg-slate-200 text-slate-800 border border-slate-300";
-            return "bg-teal-100 text-teal-900 border border-teal-300";
-        }
-
-        function filterTable() {
-            const query = document.getElementById("searchInput").value.toLowerCase();
-            const selectedPortal = document.getElementById("portalFilter").value;
-            const selectedTipo = document.getElementById("tipoFilter").value;
-
-            const filtered = rematesData.filter(item => {
-                const matchesQuery = item.id.toLowerCase().includes(query) || 
-                                     item.desc.toLowerCase().includes(query) || 
-                                     item.comuna.toLowerCase().includes(query) || 
-                                     item.portal.toLowerCase().includes(query);
-                
-                const matchesPortal = selectedPortal === "ALL" || item.portal === selectedPortal;
-                const matchesTipo = selectedTipo === "ALL" || item.tipo === selectedTipo;
-
-                return matchesQuery && matchesPortal && matchesTipo;
-            });
-
-            renderTable(filtered);
-        }
-
-        function switchTab(tabName) {
-            const rematesTab = document.getElementById("tabRemates");
-            const portalesTab = document.getElementById("tabPortales");
-            const contentRemates = document.getElementById("contentRemates");
-            const contentPortales = document.getElementById("contentPortales");
-
-            if (tabName === 'remates') {
-                rematesTab.className = "px-5 py-2.5 rounded-lg text-sm font-bold border transition flex items-center space-x-2 tab-btn-active";
-                portalesTab.className = "px-5 py-2.5 rounded-lg text-sm font-bold border transition flex items-center space-x-2 tab-btn-inactive";
-                contentRemates.classList.remove("hidden");
-                contentPortales.classList.add("hidden");
-            } else {
-                portalesTab.className = "px-5 py-2.5 rounded-lg text-sm font-bold border transition flex items-center space-x-2 tab-btn-active";
-                rematesTab.className = "px-5 py-2.5 rounded-lg text-sm font-bold border transition flex items-center space-x-2 tab-btn-inactive";
-                contentPortales.classList.remove("hidden");
-                contentRemates.classList.add("hidden");
-            }
-        }
-
-        function copyTableToClipboard() {
-            let tsv = "ID / Rol\tOrigen / Portal\tTipo Inmueble\tDescripción\tComuna\tMínimo Subasta\tGarantía Exigida ($)\tFecha Remate\tModalidad\tURL Exacta Ficha\n";
-            rematesData.forEach(r => {
-                tsv += `${r.id}\t${r.portal}\t${r.tipo}\t${r.desc}\t${r.comuna}\t${r.minimo}\t${r.garantiaVal}\t${r.fecha}\t${r.modalidad}\t${r.url}\n`;
-            });
-
-            const el = document.createElement('textarea');
-            el.value = tsv;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-
-            showToast("¡Matriz copiada en formato TSV! Pégala (Ctrl+V) directamente en Google Sheets.");
-        }
-
-        function exportToCSV() {
-            let csv = "\uFEFFID / Rol,Origen / Portal,Tipo Inmueble,Descripción,Comuna,Mínimo Subasta,Garantía Exigida ($),Fecha Remate,Modalidad,URL Exacta Ficha\n";
-            rematesData.forEach(r => {
-                csv += `"${r.id}","${r.portal}","${r.tipo}","${r.desc}","${r.comuna}","${r.minimo}",${r.garantiaVal},"${r.fecha}","${r.modalidad}","${r.url}"\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "remates_inmobiliarios_chile_daniel_olivares.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showToast("¡Archivo CSV descargado con éxito!");
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById("toast");
-            document.getElementById("toastMessage").innerText = msg;
-            toast.classList.remove("hidden");
-            setTimeout(() => {
-                toast.classList.add("hidden");
-            }, 3500);
-        }
-
-        function openApiModal() {
-            const storedKey = localStorage.getItem('gemini_api_key') || '';
-            const input = document.getElementById('geminiApiKeyInput');
-            const status = document.getElementById('apiKeyStatus');
-            
-            input.value = storedKey;
-            if (storedKey) {
-                status.innerText = "Estado: API Key guardada (" + storedKey.substring(0, 8) + "...)";
-                status.className = "text-xs font-semibold text-emerald-600";
-            } else {
-                status.innerText = "Estado: Sin guardar";
-                status.className = "text-xs font-semibold text-slate-500";
-            }
-            document.getElementById('apiModal').classList.remove('hidden');
-        }
-
-        function closeApiModal() {
-            document.getElementById('apiModal').classList.add('hidden');
-        }
-
-        function toggleKeyVisibility() {
-            const input = document.getElementById('geminiApiKeyInput');
-            const icon = document.getElementById('keyEyeIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fa-solid fa-eye-slash';
-            } else {
-                input.type = 'password';
-                icon.className = 'fa-solid fa-eye';
-            }
-        }
-
-        function saveApiKey() {
-            const key = document.getElementById('geminiApiKeyInput').value.trim();
-            if (!key) {
-                showToast("Por favor ingresa una API Key válida de Gemini.");
-                return;
-            }
-            localStorage.setItem('gemini_api_key', key);
-            closeApiModal();
-            showToast("¡API Key de Google Gemini guardada con éxito!");
-        }
-
-        async function runScrapingWithGemini() {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) {
-                showToast("Debes configurar primero tu API Key de Gemini.");
-                openApiModal();
-                return;
-            }
-
-            const loader = document.getElementById('scrapingLoader');
-            const statusText = document.getElementById('scrapingStatusText');
-            const progressBar = document.getElementById('scrapingProgressBar');
-
-            loader.classList.remove('hidden');
-            progressBar.style.width = '20%';
-            statusText.innerText = 'Inicializando modelo Gemini 2.0 Flash...';
-
-            try {
-                setTimeout(() => {
-                    progressBar.style.width = '50%';
-                    statusText.innerText = 'Extrayendo fichas actualizadas de Macal, Tattersall y PJUD...';
-                }, 1000);
-
-                setTimeout(() => {
-                    progressBar.style.width = '85%';
-                    statusText.innerText = 'Sincronizando garantías del 10% y URLs exactas...';
-                }, 2000);
-
-                // Call Google Gemini API
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `Responde ÚNICAMENTE en formato JSON válido. Genera un arreglo de 3 objetos JSON que representen 3 nuevos remates reales de inmuebles en Chile (casas o departamentos) para agregar al consolidado. Cada objeto debe tener las siguientes claves exactas: "id" (string), "portal" (string como "Macal Remates" o "Tattersall Remates"), "tipo" ("Casa" o "Departamento"), "desc" (string con dirección), "comuna" (string), "region" (string), "minimo" (string), "garantiaVal" (numero entero en CLP), "fecha" (string formato DD-MM-YYYY), "modalidad" (string), "url" (string con URL exacta de ficha).`
-                            }]
-                        }]
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text) {
-                        try {
-                            const cleanJsonText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-                            const newItems = JSON.parse(cleanJsonText);
-                            if (Array.isArray(newItems)) {
-                                newItems.forEach(item => rematesData.unshift(item));
-                            }
-                        } catch (e) {
-                            console.log("Parsing AI response, fallback to dataset refresh");
-                        }
-                    }
-                }
-
-                progressBar.style.width = '100%';
-                setTimeout(() => {
-                    loader.classList.add('hidden');
-                    renderTable(rematesData);
-                    showToast("¡Scraping AI completado! Dataset actualizado con éxito.");
-                }, 800);
-
-            } catch (error) {
-                console.error("Gemini Scraping Error:", error);
-                setTimeout(() => {
-                    loader.classList.add('hidden');
-                    renderTable(rematesData);
-                    showToast("¡Base de datos sincronizada y re-escrapeada correctamente!");
-                }, 1000);
-            }
-        }
-
-        window.onload = function() {
-            renderTable(rematesData);
-        };
+        window.onload = renderFilteredTable;
     </script>
 </body>
 </html>
