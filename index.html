@@ -74,6 +74,9 @@
             <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center transition">
                 <i class="fa-solid fa-file-csv mr-2"></i> Descargar CSV
             </button>
+            <button onclick="clearScrapedData()" class="bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-300 px-3 py-2 rounded-lg text-sm font-semibold flex items-center transition" title="Borrar remates extraídos por Claude">
+                <i class="fa-solid fa-trash-can mr-1.5"></i> Limpiar
+            </button>
         </div>
     </header>
 
@@ -628,7 +631,7 @@
             closeApiModal();
         }
 
-        // Extrae el primer arreglo JSON [...] de un texto.
+        // Extrae el arreglo JSON [...] de un texto, tolerando truncamiento.
         function extractJsonArray(text) {
             try { return JSON.parse(text); } catch (e) { /* seguir */ }
             // Quitar posibles fences ```json ... ```
@@ -639,6 +642,16 @@
             const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
             if (match) {
                 try { return JSON.parse(match[0]); } catch (e) { /* seguir */ }
+            }
+            // Recuperación ante JSON truncado: parsear cada objeto plano por separado.
+            // (Cada remate es un objeto sin llaves anidadas, así que { ... } basta.)
+            const objs = text.match(/\{[^{}]*\}/g);
+            if (objs) {
+                const recovered = [];
+                for (const o of objs) {
+                    try { recovered.push(JSON.parse(o)); } catch (e) { /* saltar objeto incompleto */ }
+                }
+                if (recovered.length) return recovered;
             }
             return null;
         }
@@ -655,10 +668,16 @@
         // Extrae los remates de UN portal con Claude + web_fetch.
         async function scrapeOnePortal(apiKey, target) {
             const promptText =
-`Eres un extractor de datos de remates inmobiliarios en Chile. Usa la herramienta web_fetch para LEER el contenido REAL de este portal y, si es necesario, sus páginas internas de listados o fichas de propiedades:
+`Eres un extractor de datos de remates inmobiliarios en Chile. Usa la herramienta web_fetch para LEER el contenido REAL de este portal y de TODAS sus páginas internas de listados y fichas:
 ${target.url}
 
-Extrae TODAS las propiedades en remate que encuentres. NO inventes datos: usa solo lo que aparece en la página. Si el portal no carga, requiere inicio de sesión, o no muestra propiedades, responde con un arreglo vacío [].
+MUY IMPORTANTE — recorre TODA la paginación:
+1. Lee la página de listado de remates.
+2. Detecta si hay paginación (enlaces "siguiente"/"próxima", números de página, o parámetros de URL como ?pagina=2, ?page=2, &p=2, /pagina/2, etc.).
+3. Sigue fetcheando cada página de listado, una tras otra, hasta que no haya más resultados. NO te detengas en la primera página.
+4. Extrae TODAS las propiedades de TODAS las páginas. El objetivo es el inventario COMPLETO, no una muestra.
+
+NO inventes datos: usa solo lo que aparece en las páginas. Si el portal no carga, requiere inicio de sesión, o no muestra propiedades, responde con un arreglo vacío [].
 
 Para cada propiedad devuelve un objeto con EXACTAMENTE estas claves:
 "id" (identificador, rol o ficha; si no hay, usa un slug de la dirección),
@@ -673,12 +692,12 @@ Para cada propiedad devuelve un objeto con EXACTAMENTE estas claves:
 "modalidad" (ej: "Online", "Presencial", "Online (Zoom)"; "" si no aparece),
 "url" (URL real y exacta de la ficha de la propiedad).
 
-Responde ÚNICAMENTE con un arreglo JSON válido [ { ... } ], sin texto adicional antes ni después.`;
+Devuelve el JSON compacto (sin saltos de línea entre objetos). Responde ÚNICAMENTE con un arreglo JSON válido [ { ... } ], sin texto adicional antes ni después.`;
 
             const requestBody = {
                 model: CLAUDE_MODEL,
-                max_tokens: 12000,
-                tools: [{ type: "web_fetch_20260209", name: "web_fetch", max_uses: 12 }],
+                max_tokens: 16000,
+                tools: [{ type: "web_fetch_20260209", name: "web_fetch", max_uses: 25 }],
                 messages: [{ role: "user", content: promptText }]
             };
 
@@ -735,6 +754,25 @@ Responde ÚNICAMENTE con un arreglo JSON válido [ { ... } ], sin texto adiciona
             }));
         }
 
+        // Persistencia de remates extraídos (sobreviven al recargar la página).
+        const SCRAPED_STORAGE_KEY = "scraped_remates_v2";
+        function loadScrapedFromStorage() {
+            try { return JSON.parse(localStorage.getItem(SCRAPED_STORAGE_KEY) || "[]"); }
+            catch (e) { return []; }
+        }
+        function saveScrapedToStorage(arr) {
+            try { localStorage.setItem(SCRAPED_STORAGE_KEY, JSON.stringify(arr.slice(0, 3000))); }
+            catch (e) { console.warn("No se pudo guardar en localStorage:", e); }
+        }
+        function itemKey(x) { return x.url || (x.id + "|" + x.portal); }
+
+        // Vaciar los remates extraídos (deja solo la data base).
+        function clearScrapedData() {
+            if (!confirm("¿Borrar todos los remates extraídos por Claude y volver solo a la data base?")) return;
+            localStorage.removeItem(SCRAPED_STORAGE_KEY);
+            location.reload();
+        }
+
         // SCRAPING REAL CON CLAUDE: recorre TODOS los portales, uno por uno.
         async function runScrapingWithClaude() {
             const apiKey = localStorage.getItem("claude_api_key");
@@ -755,6 +793,8 @@ Responde ÚNICAMENTE con un arreglo JSON válido [ { ... } ], sin texto adiciona
             let grandTotal = 0;
             const resumen = [];
             let fatalMsg = null;
+            let persisted = loadScrapedFromStorage();
+            let seenKeys = new Set(rematesData.map(itemKey));
 
             for (let i = 0; i < total; i++) {
                 const target = SCRAPE_TARGETS[i];
@@ -763,42 +803,64 @@ Responde ÚNICAMENTE con un arreglo JSON válido [ { ... } ], sin texto adiciona
 
                 try {
                     const items = await scrapeOnePortal(apiKey, target);
-                    if (items.length > 0) {
-                        // Agregar de inmediato para ver el avance en la tabla.
-                        rematesData = [...items, ...rematesData];
-                        filterTable();
-                        grandTotal += items.length;
-                        resumen.push(`${target.portal}: ${items.length}`);
-                    } else {
-                        resumen.push(`${target.portal}: 0`);
+                    // Evitar duplicados (por URL, o id+portal si no hay URL).
+                    const fresh = [];
+                    for (const it of items) {
+                        const k = itemKey(it);
+                        if (!seenKeys.has(k)) { seenKeys.add(k); fresh.push(it); }
                     }
+                    if (fresh.length > 0) {
+                        rematesData = [...fresh, ...rematesData];
+                        persisted = [...fresh, ...persisted];
+                        saveScrapedToStorage(persisted);
+                        filterTable();
+                        grandTotal += fresh.length;
+                    }
+                    resumen.push(`${target.portal}: ${fresh.length}${items.length !== fresh.length ? " (+" + (items.length - fresh.length) + " duplicados)" : ""}`);
                 } catch (error) {
                     console.error(`Scraping error (${target.portal}):`, error);
                     if (error instanceof FatalScrapeError) {
                         fatalMsg = error.message;
                         break;
                     }
-                    resumen.push(`${target.portal}: error`);
+                    resumen.push(`${target.portal}: error (${error.message})`);
                 }
             }
 
             progressBar.style.width = "100%";
             statusText.textContent = "Consolidando resultados...";
-            console.log("Resumen scraping:", resumen.join(" | "));
+            const detalle = resumen.join("\n");
+            console.log("Resumen scraping:\n" + detalle);
 
             setTimeout(() => {
                 loader.classList.add("hidden");
                 if (fatalMsg) {
-                    showToast(`Error: ${fatalMsg}`);
+                    // Error crítico: alerta imposible de pasar por alto.
+                    alert("SCRAPING DETENIDO\n\n" + fatalMsg +
+                        "\n\nDetalle por portal:\n" + detalle);
                 } else if (grandTotal > 0) {
-                    showToast(`¡Scraping completado! ${grandTotal} remates reales agregados de ${resumen.filter(r => !r.endsWith(": 0") && !r.endsWith("error")).length} portal(es).`);
+                    showToast(`¡Scraping completado! ${grandTotal} remates reales nuevos agregados.`);
+                    alert(`Scraping completado.\n\nTotal nuevo: ${grandTotal} remates.\n\nDetalle por portal:\n${detalle}`);
                 } else {
-                    showToast("No se encontraron remates accesibles en los portales en este momento.");
+                    alert("No se agregaron remates nuevos.\n\nDetalle por portal:\n" + detalle +
+                        "\n\nSi todo dice 0 o 'error', revisa: (1) que tu cuenta tenga saldo en console.anthropic.com, y (2) la consola del navegador (F12) para ver detalles.");
                 }
             }, 400);
         }
 
         window.onload = function() {
+            // Restaurar remates extraídos por Claude en sesiones anteriores.
+            const persisted = loadScrapedFromStorage();
+            if (persisted.length) {
+                const seen = new Set(rematesData.map(itemKey));
+                const restored = persisted.filter(it => {
+                    const k = itemKey(it);
+                    if (seen.has(k)) return false;
+                    seen.add(k);
+                    return true;
+                });
+                rematesData = [...restored, ...rematesData];
+            }
             // Render the entire dataset without any restrictions or capping on count
             renderTable(getFutureFilteredData());
         };
