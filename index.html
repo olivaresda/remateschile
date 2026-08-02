@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remates Inmobiliarios Chile 2026 - Google Sheets App</title>
+    <title>Remates Inmobiliarios Chile 2026 v2.0 - Scraping con Claude IA</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -42,9 +42,10 @@
             <div>
                 <div class="flex flex-wrap items-center gap-2">
                     <h1 class="font-bold text-xl text-slate-900 leading-tight">Remates Judiciales & Inmobiliarios Chile 2026</h1>
+                    <span class="bg-slate-900 text-white border border-slate-700 text-xs px-2.5 py-0.5 rounded-full font-bold">v2.0</span>
                     <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs px-2.5 py-0.5 rounded-full font-bold">Sheets Live</span>
                     <span class="bg-amber-100 text-amber-900 border border-amber-300 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center">
-                        <i class="fa-solid fa-infinity mr-1 text-amber-600"></i> Scraping Sin Límites (Totalidad de Registros)
+                        <i class="fa-solid fa-robot mr-1 text-amber-600"></i> Scraping Real con Claude IA (web_fetch)
                     </span>
                     <!-- Prominent Authorship Tag -->
                     <span class="bg-slate-800 text-amber-300 border border-slate-700 text-xs px-3 py-0.5 rounded-full font-semibold shadow-sm flex items-center">
@@ -61,10 +62,10 @@
 
         <!-- Toolbar Actions -->
         <div class="flex items-center space-x-2">
-            <button onclick="runScrapingWithGemini()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3.5 py-2 rounded-lg text-sm flex items-center transition shadow-md active:scale-95">
-                <i class="fa-solid fa-wand-magic-sparkles mr-2 text-slate-900"></i> Ejecutar Scraping IA Total
+            <button onclick="runScrapingWithClaude()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3.5 py-2 rounded-lg text-sm flex items-center transition shadow-md active:scale-95">
+                <i class="fa-solid fa-robot mr-2 text-slate-900"></i> Ejecutar Scraping con Claude
             </button>
-            <button onclick="openApiModal()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-3 py-2 rounded-lg text-sm font-semibold flex items-center transition shadow-sm" title="Configurar API Key de Gemini">
+            <button onclick="openApiModal()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-3 py-2 rounded-lg text-sm font-semibold flex items-center transition shadow-sm" title="Configurar API Key de Claude (Anthropic)">
                 <i class="fa-solid fa-key mr-1.5 text-amber-400"></i> API Key
             </button>
             <button onclick="copyTableToClipboard()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center transition shadow-sm">
@@ -95,7 +96,7 @@
                 <button onclick="switchTab('portales')" id="tabPortales" class="px-5 py-2.5 rounded-lg text-sm font-bold border transition flex items-center space-x-2 tab-btn-inactive">
                     <i class="fa-solid fa-list-check text-base"></i>
                     <span>PESTAÑA 1: Directorio de Portales Fuentes</span>
-                    <span class="bg-slate-200 text-slate-800 text-xs px-2 py-0.5 rounded-full ml-1 font-mono">7 Fuentes</span>
+                    <span class="bg-slate-200 text-slate-800 text-xs px-2 py-0.5 rounded-full ml-1 font-mono">8 Fuentes</span>
                 </button>
             </div>
 
@@ -119,7 +120,8 @@
 
             <!-- Portal Filter -->
             <select id="portalFilter" onchange="filterTable()" class="border border-slate-300 rounded-md px-3 py-1.5 text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 font-medium">
-                <option value="ALL">Todos los Portales (7/7)</option>
+                <option value="ALL">Todos los Portales (8/8)</option>
+                <option value="Remates Inmobiliarios">Remates Inmobiliarios</option>
                 <option value="Macal Remates">Macal Remates</option>
                 <option value="Tattersall Remates">Tattersall Remates</option>
                 <option value="Oficina Judicial Virtual">Oficina Judicial Virtual (PJUD)</option>
@@ -195,7 +197,7 @@
                     </h2>
                     <p class="text-xs text-slate-300 mt-0.5">Catálogo oficial para consultar edictos, remates de juzgados civiles y subastas inmobiliarias privadas</p>
                 </div>
-                <span class="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-bold">7 Fuentes Mapeadas</span>
+                <span class="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-bold">8 Fuentes Mapeadas</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="sheet-grid w-full text-left text-sm border-collapse">
@@ -208,6 +210,12 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50 bg-emerald-50/40">
+                            <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-gavel text-emerald-600 mr-2"></i>Remates Inmobiliarios <span class="bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded ml-1">Scraping activo</span></td>
+                            <td class="p-3"><a href="https://www.rematesinmobiliarios.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://www.rematesinmobiliarios.cl</a></td>
+                            <td class="p-3">Casas, Departamentos, Parcelas, Sitios</td>
+                            <td class="p-3">Portal especializado en remates inmobiliarios judiciales y bancarios. Fuente extraída en vivo mediante Claude IA (herramienta web_fetch).</td>
+                        </tr>
                         <tr class="hover:bg-slate-50">
                             <td class="p-3 font-bold text-slate-800"><i class="fa-solid fa-house-circle-check text-orange-500 mr-2"></i>Macal Remates</td>
                             <td class="p-3"><a href="https://www.macal.cl" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">https://www.macal.cl</a></td>
@@ -262,7 +270,7 @@
         <div class="flex items-center space-x-2">
             <span class="text-white font-bold">Remates Inmobiliarios Chile 2026</span>
             <span>•</span>
-            <span>Matriz de Subastas & Google Sheets App (Procesamiento Ilimitado)</span>
+            <span>Matriz de Subastas v2.0 · Scraping real con Claude IA (web_fetch)</span>
         </div>
         <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1 rounded-md border border-slate-700 text-slate-200 font-medium">
             <i class="fa-solid fa-user-check text-emerald-400"></i>
@@ -282,25 +290,25 @@
             <!-- Modal Header -->
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-brain text-amber-400 text-xl"></i>
-                    <h3 class="font-bold text-lg">Configuración de API Google Gemini (Scraping Total)</h3>
+                    <i class="fa-solid fa-robot text-amber-400 text-xl"></i>
+                    <h3 class="font-bold text-lg">Configuración de API Claude (Anthropic)</h3>
                 </div>
                 <button onclick="closeApiModal()" class="text-slate-400 hover:text-white text-lg transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            
+
             <!-- Modal Body -->
             <div class="p-6 space-y-4 text-sm text-slate-700">
                 <p class="leading-relaxed">
-                    Ingresa tu <strong class="text-slate-900">API Key de Google Gemini</strong> para realizar consultas de scraping automatizado sin límite sobre todas las fuentes de remates inmobiliarios en Chile.
+                    Ingresa tu <strong class="text-slate-900">API Key de Claude (Anthropic)</strong> para ejecutar scraping real sobre los portales de remates. Claude usa su herramienta <code class="bg-slate-100 px-1 rounded text-xs">web_fetch</code> para leer las páginas y extraer los datos verdaderos.
                 </p>
 
                 <div class="space-y-1.5">
-                    <label for="geminiApiKeyInput" class="block font-bold text-slate-800 text-xs uppercase tracking-wider">Tu API Key de Gemini:</label>
+                    <label for="claudeApiKeyInput" class="block font-bold text-slate-800 text-xs uppercase tracking-wider">Tu API Key de Claude:</label>
                     <div class="relative">
                         <i class="fa-solid fa-key absolute left-3 top-3 text-slate-400"></i>
-                        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." 
+                        <input type="password" id="claudeApiKeyInput" placeholder="sk-ant-..."
                                class="w-full pl-9 pr-10 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono">
                         <button onclick="toggleKeyVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
                             <i id="keyEyeIcon" class="fa-solid fa-eye"></i>
@@ -312,13 +320,20 @@
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 text-xs text-amber-900">
                     <div class="font-bold flex items-center text-amber-900">
                         <i class="fa-solid fa-circle-info mr-1.5 text-amber-600 text-sm"></i>
-                        Obtener API Key en Google AI Studio
+                        Cómo obtener tu API Key de Claude (pasos)
                     </div>
                     <ol class="list-decimal list-inside space-y-1 text-slate-700 font-medium">
-                        <li>Ingresa a <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 underline font-bold">Google AI Studio</a>.</li>
-                        <li>Genera tu clave en <strong class="text-slate-900">"Get API key"</strong>.</li>
-                        <li>Pégala aquí para activar el barrido masivo sin topes.</li>
+                        <li>Entra a <a href="https://console.anthropic.com/" target="_blank" class="text-blue-600 underline font-bold">console.anthropic.com</a> y crea tu cuenta.</li>
+                        <li>Ve a <strong class="text-slate-900">Settings → API Keys</strong> (o <strong>"API Keys"</strong> en el menú lateral).</li>
+                        <li>Haz clic en <strong class="text-slate-900">"Create Key"</strong>, ponle un nombre y cópiala (empieza con <code class="bg-white/60 px-1 rounded">sk-ant-</code>).</li>
+                        <li>En <strong class="text-slate-900">Billing → Credits</strong> agrega saldo (mínimo ~US$5) — el scraping consume tokens de tu cuenta.</li>
+                        <li>Pega la clave aquí y presiona Guardar.</li>
                     </ol>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-800 flex items-start space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 mt-0.5"></i>
+                    <span><strong>Seguridad:</strong> la clave se guarda en tu navegador y se envía directo a la API desde esta página. Úsala solo en tu equipo personal. <strong>No publiques</strong> este sitio con tu clave real.</span>
                 </div>
             </div>
 
@@ -328,7 +343,7 @@
                     Cancelar
                 </button>
                 <button onclick="saveApiKey()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-lg text-xs font-extrabold shadow transition flex items-center">
-                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Guardar API Key
+                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Guardar API Key de Claude
                 </button>
             </div>
         </div>
@@ -344,9 +359,9 @@
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
             </div>
-            <h3 class="font-bold text-xl text-white">Ejecutando Scraping Masivo IA sin Límites...</h3>
+            <h3 class="font-bold text-xl text-white">Claude está leyendo el portal y extrayendo remates...</h3>
             <p id="scrapingStatusText" class="text-xs text-slate-300 leading-relaxed font-mono">
-                Extrayendo el 100% de propiedades disponibles en Macal, Tattersall, PJUD, OJV, DICREP y Diario Oficial...
+                Usando la herramienta web_fetch para leer los portales de remates y estructurar las propiedades...
             </p>
             <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
                 <div id="scrapingProgressBar" class="bg-emerald-500 h-full w-1/4 transition-all duration-500 rounded-full"></div>
@@ -560,9 +575,25 @@
             setTimeout(() => toast.classList.add("hidden"), 3500);
         }
 
+        // ---- Configuración de Claude (Anthropic) ----
+        const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
+        const CLAUDE_MODEL = "claude-opus-5";
+        // Portales objetivo del scraping. Cada uno con su URL y el nombre EXACTO
+        // que debe usarse en la columna "portal" (coincide con el filtro de arriba).
+        const SCRAPE_TARGETS = [
+            { url: "https://www.rematesinmobiliarios.cl/", portal: "Remates Inmobiliarios" },
+            { url: "https://www.macal.cl/", portal: "Macal Remates" },
+            { url: "https://www.tattersallremates.cl/", portal: "Tattersall Remates" },
+            { url: "https://ojv.pjud.cl/", portal: "Oficina Judicial Virtual" },
+            { url: "https://www.pjud.cl/", portal: "Poder Judicial de Chile" },
+            { url: "https://www.dicrep.cl/", portal: "DICREP (La Tía Rica)" },
+            { url: "https://www.diarioficial.cl/", portal: "Diario Oficial de Chile" },
+            { url: "https://preremates.cl/", portal: "Preremates" }
+        ];
+
         function openApiModal() {
-            const key = localStorage.getItem("gemini_api_key") || "";
-            document.getElementById("geminiApiKeyInput").value = key;
+            const key = localStorage.getItem("claude_api_key") || "";
+            document.getElementById("claudeApiKeyInput").value = key;
             document.getElementById("apiKeyStatus").textContent = key ? "Estado: API Key Configurada" : "Estado: Sin guardar";
             document.getElementById("apiModal").classList.remove("hidden");
         }
@@ -572,7 +603,7 @@
         }
 
         function toggleKeyVisibility() {
-            const input = document.getElementById("geminiApiKeyInput");
+            const input = document.getElementById("claudeApiKeyInput");
             const icon = document.getElementById("keyEyeIcon");
             if (input.type === "password") {
                 input.type = "text";
@@ -584,19 +615,129 @@
         }
 
         function saveApiKey() {
-            const key = document.getElementById("geminiApiKeyInput").value.trim();
+            const key = document.getElementById("claudeApiKeyInput").value.trim();
             if (!key) {
-                alert("Por favor ingresa una API Key válida.");
+                alert("Por favor ingresa una API Key válida de Claude (empieza con sk-ant-).");
                 return;
             }
-            localStorage.setItem("gemini_api_key", key);
-            showToast("¡API Key de Gemini guardada correctamente!");
+            if (!key.startsWith("sk-ant-")) {
+                if (!confirm("La clave no empieza con 'sk-ant-'. ¿Guardar de todas formas?")) return;
+            }
+            localStorage.setItem("claude_api_key", key);
+            showToast("¡API Key de Claude guardada correctamente!");
             closeApiModal();
         }
 
-        // UNLIMITED SCRAPING EXECUTION WITH GEMINI AI
-        async function runScrapingWithGemini() {
-            const apiKey = localStorage.getItem("gemini_api_key");
+        // Extrae el primer arreglo JSON [...] de un texto.
+        function extractJsonArray(text) {
+            try { return JSON.parse(text); } catch (e) { /* seguir */ }
+            // Quitar posibles fences ```json ... ```
+            const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+            if (fenced) {
+                try { return JSON.parse(fenced[1]); } catch (e) { /* seguir */ }
+            }
+            const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
+            if (match) {
+                try { return JSON.parse(match[0]); } catch (e) { /* seguir */ }
+            }
+            return null;
+        }
+
+        // Junta todo el texto de los bloques de la respuesta de Claude.
+        function collectClaudeText(content) {
+            if (!Array.isArray(content)) return "";
+            return content.filter(b => b.type === "text").map(b => b.text).join("\n");
+        }
+
+        // Error que detiene todo el barrido (ej: clave inválida / sin saldo).
+        class FatalScrapeError extends Error {}
+
+        // Extrae los remates de UN portal con Claude + web_fetch.
+        async function scrapeOnePortal(apiKey, target) {
+            const promptText =
+`Eres un extractor de datos de remates inmobiliarios en Chile. Usa la herramienta web_fetch para LEER el contenido REAL de este portal y, si es necesario, sus páginas internas de listados o fichas de propiedades:
+${target.url}
+
+Extrae TODAS las propiedades en remate que encuentres. NO inventes datos: usa solo lo que aparece en la página. Si el portal no carga, requiere inicio de sesión, o no muestra propiedades, responde con un arreglo vacío [].
+
+Para cada propiedad devuelve un objeto con EXACTAMENTE estas claves:
+"id" (identificador, rol o ficha; si no hay, usa un slug de la dirección),
+"portal" (usa EXACTAMENTE el texto "${target.portal}"),
+"tipo" ("Departamento", "Casa", "Edificio / Oficinas", "Sitio", "Parcela" u "Otro"),
+"desc" (descripción con dirección y m² si están),
+"comuna" (comuna de Chile),
+"region" (ej: "RM", "V Región"; "" si no aparece),
+"minimo" (mínimo de subasta tal como aparece, ej: "UF 2.500" o "$45.000.000"),
+"garantiaVal" (número entero en CLP de la garantía si aparece; si no, null),
+"fecha" (fecha del remate en formato DD-MM-YYYY; "" si no aparece),
+"modalidad" (ej: "Online", "Presencial", "Online (Zoom)"; "" si no aparece),
+"url" (URL real y exacta de la ficha de la propiedad).
+
+Responde ÚNICAMENTE con un arreglo JSON válido [ { ... } ], sin texto adicional antes ni después.`;
+
+            const requestBody = {
+                model: CLAUDE_MODEL,
+                max_tokens: 12000,
+                tools: [{ type: "web_fetch_20260209", name: "web_fetch", max_uses: 12 }],
+                messages: [{ role: "user", content: promptText }]
+            };
+
+            let data = null;
+            // Bucle para manejar pause_turn (Claude puede pausar el uso de herramientas).
+            for (let attempt = 0; attempt < 6; attempt++) {
+                const res = await fetch(CLAUDE_API_URL, {
+                    method: "POST",
+                    headers: {
+                        "content-type": "application/json",
+                        "x-api-key": apiKey,
+                        "anthropic-version": "2023-06-01",
+                        "anthropic-dangerous-direct-browser-access": "true"
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!res.ok) {
+                    let msg = `HTTP ${res.status}`;
+                    try { const e = await res.json(); msg = e.error?.message || msg; } catch (_) {}
+                    if (res.status === 401 || res.status === 403) {
+                        throw new FatalScrapeError("API Key inválida o sin permisos. Revisa tu clave en console.anthropic.com.");
+                    }
+                    if (res.status === 400 && /credit|balance|saldo/i.test(msg)) {
+                        throw new FatalScrapeError("Sin saldo en la cuenta. Agrega créditos en Billing (console.anthropic.com).");
+                    }
+                    throw new Error(msg);
+                }
+
+                data = await res.json();
+                if (data.stop_reason === "pause_turn") {
+                    requestBody.messages.push({ role: "assistant", content: data.content });
+                    continue;
+                }
+                break;
+            }
+
+            const text = collectClaudeText(data && data.content);
+            const items = extractJsonArray(text);
+            if (!Array.isArray(items)) return [];
+
+            return items.map((it, i) => ({
+                id: it.id || `${target.portal.slice(0, 3).toUpperCase()}-${Date.now()}-${i}`,
+                portal: it.portal || target.portal,
+                tipo: it.tipo || "Otro",
+                desc: it.desc || "",
+                comuna: it.comuna || "",
+                region: it.region || "",
+                minimo: it.minimo || "",
+                garantiaVal: Number(it.garantiaVal) || 0,
+                fecha: it.fecha || "",
+                modalidad: it.modalidad || "",
+                url: it.url || target.url
+            }));
+        }
+
+        // SCRAPING REAL CON CLAUDE: recorre TODOS los portales, uno por uno.
+        async function runScrapingWithClaude() {
+            const apiKey = localStorage.getItem("claude_api_key");
             if (!apiKey) {
                 openApiModal();
                 return;
@@ -607,101 +748,54 @@
             const progressBar = document.getElementById("scrapingProgressBar");
 
             loader.classList.remove("hidden");
-            progressBar.style.width = "25%";
-            statusText.textContent = "Iniciando barrido masivo sin límite en Macal, Tattersall, PJUD y Diario Oficial...";
+            progressBar.style.width = "5%";
+            statusText.textContent = "Conectando con Claude...";
 
-            try {
-                setTimeout(() => { progressBar.style.width = "60%"; statusText.textContent = "Extrayendo el 100% de propiedades de subastas activas..."; }, 1200);
+            const total = SCRAPE_TARGETS.length;
+            let grandTotal = 0;
+            const resumen = [];
+            let fatalMsg = null;
 
-                // Gemini API Call requesting full extraction without truncation
-                const promptText = `Extrae y genera en formato JSON estricto un arreglo de objetos de remates inmobiliarios judiciales y privados en Chile para el año 2026. IMPORTANTE: NO pongas ningún límite ni restricción numérica (NO te limites a 40 ni a ningún número fijado). Devuelve TODOS los remates posibles encontrados de Macal, Tattersall, PJUD, OJV, DICREP y Diario Oficial. 
-Cada objeto debe tener estas claves exactas:
-"id" (ej: "P990-X" o "TAT-6000" o "C-1200-2026"),
-"portal" (ej: "Macal Remates" o "Tattersall Remates" o "Oficina Judicial Virtual"),
-"tipo" ("Departamento", "Casa", "Edificio / Oficinas"),
-"desc" (descripción detallada con m² y dirección),
-"comuna" (comuna de Chile),
-"region" (ej: "RM", "V Región"),
-"minimo" (ej: "UF 2.500" o "$45.000.000"),
-"garantiaVal" (número entero en CLP, aproximadamente 10% del valor),
-"fecha" (fecha en formato DD-MM-YYYY futura entre Agosto y Diciembre 2026),
-"modalidad" (ej: "Online Tattersall", "Plataforma Macal", "Online (Zoom)"),
-"url" (URL ficticia pero coherente del portal)
-Responde ÚNICAMENTE con el bloque JSON [ { ... }, { ... } ].`;
+            for (let i = 0; i < total; i++) {
+                const target = SCRAPE_TARGETS[i];
+                progressBar.style.width = Math.round((i / total) * 100) + "%";
+                statusText.textContent = `Leyendo ${target.portal} (${i + 1}/${total})...`;
 
-                // Try compatible models in sequence (gemini-2.5-flash, gemini-1.5-flash, gemini-2.0-flash)
-                const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"];
-                let response = null;
-                let lastErrorMsg = "";
-
-                for (const model of modelsToTry) {
-                    try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: promptText }] }],
-                                generationConfig: {
-                                    responseMimeType: "application/json"
-                                }
-                            })
-                        });
-
-                        if (res.ok) {
-                            response = res;
-                            break;
-                        } else {
-                            const errData = await res.json().catch(() => ({}));
-                            lastErrorMsg = errData.error?.message || `HTTP ${res.status}: ${res.statusText}`;
-                        }
-                    } catch (e) {
-                        lastErrorMsg = e.message;
-                    }
-                }
-
-                if (!response) {
-                    throw new Error(lastErrorMsg || "No se pudo conectar con la API de Gemini.");
-                }
-
-                progressBar.style.width = "85%";
-                statusText.textContent = "Procesando respuesta JSON y consolidando matriz de subastas...";
-
-                const data = await response.json();
-                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (!textResponse) {
-                    throw new Error("Respuesta vacía devuelta por la API de Gemini.");
-                }
-
-                let newScrapedItems = [];
                 try {
-                    newScrapedItems = JSON.parse(textResponse);
-                } catch (pErr) {
-                    const jsonMatch = textResponse.match(/\[\s*\{[\s\S]*\}\s*\]/);
-                    if (jsonMatch) {
-                        newScrapedItems = JSON.parse(jsonMatch[0]);
-                    } else {
-                        throw new Error("Formato de respuesta JSON no válido.");
-                    }
-                }
-
-                if (Array.isArray(newScrapedItems) && newScrapedItems.length > 0) {
-                    rematesData = [...newScrapedItems, ...rematesData];
-                    progressBar.style.width = "100%";
-                    setTimeout(() => {
-                        loader.classList.add("hidden");
+                    const items = await scrapeOnePortal(apiKey, target);
+                    if (items.length > 0) {
+                        // Agregar de inmediato para ver el avance en la tabla.
+                        rematesData = [...items, ...rematesData];
                         filterTable();
-                        showToast(`¡Scraping masivo completado! Se agregaron ${newScrapedItems.length} nuevos remates.`);
-                    }, 500);
-                } else {
-                    throw new Error("El resultado del scraping no contiene elementos válidos.");
+                        grandTotal += items.length;
+                        resumen.push(`${target.portal}: ${items.length}`);
+                    } else {
+                        resumen.push(`${target.portal}: 0`);
+                    }
+                } catch (error) {
+                    console.error(`Scraping error (${target.portal}):`, error);
+                    if (error instanceof FatalScrapeError) {
+                        fatalMsg = error.message;
+                        break;
+                    }
+                    resumen.push(`${target.portal}: error`);
                 }
-
-            } catch (error) {
-                console.error("Scraping error:", error);
-                loader.classList.add("hidden");
-                showToast(`Error API: ${error.message}`);
             }
+
+            progressBar.style.width = "100%";
+            statusText.textContent = "Consolidando resultados...";
+            console.log("Resumen scraping:", resumen.join(" | "));
+
+            setTimeout(() => {
+                loader.classList.add("hidden");
+                if (fatalMsg) {
+                    showToast(`Error: ${fatalMsg}`);
+                } else if (grandTotal > 0) {
+                    showToast(`¡Scraping completado! ${grandTotal} remates reales agregados de ${resumen.filter(r => !r.endsWith(": 0") && !r.endsWith("error")).length} portal(es).`);
+                } else {
+                    showToast("No se encontraron remates accesibles en los portales en este momento.");
+                }
+            }, 400);
         }
 
         window.onload = function() {
